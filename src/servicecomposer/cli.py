@@ -17,10 +17,13 @@ def init(clone_dir):
 
 
 @click.command()
+@click.option("-g", "--group", help="Use the name of a git repo to call all "
+              "originated services.")
 @click.argument('args', nargs=-1)
-def run(args):
+def run(group, args):
+    """Run Services using docker-compose."""
     click.echo("Run Services (calling docker-compose up)...")
-    composer.run(args)
+    composer.run(group, args)
 
 
 main.add_command(init)

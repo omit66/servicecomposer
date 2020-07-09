@@ -14,7 +14,7 @@ setuptools.setup(
         package_dir={"": "src"},
         author="Timo Stüber",
         author_email="omit66@gmail.com",
-        install_requires=["Click", "pyyaml", "git"],
+        install_requires=["Click", "pyyaml", "GitPython"],
         classifiers=[
             "Programming Language :: Python 3",
         ],

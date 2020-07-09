@@ -62,18 +62,25 @@ def adjust_volumes(volumes, prefix):
     return new_volumes
 
 
-def run(args):
+def run(group, args):
     """Run docker-compose"""
-    compose_filename = "docker-compose.yaml"
-    if not os.path.exists(compose_filename):
-        click.echo("The file {} was not found. Did you run 'servicecomposer"
-                   "init'?"
-                   .format(compose_filename))
+    compose_file = find_compose_file('.')
+    if compose_file is None:
+        click.echo("The file docker-compose.yml was not found. Did you run "
+                   "'servicecomposer init'?")
         return
     import subprocess
     cmd = "docker-compose up".split()
+    if group is not None:
+        services = []
+        for key in compose_file['services']:
+            if key.startswith(group):
+                services.append(key)
+        cmd.extend(services)
+
     if args is not None:
         cmd.extend(args)
+    click.echo(" ".join(cmd))
     subprocess.Popen(cmd)
 
 
@@ -136,6 +143,7 @@ def init(clone_dir):
             # skip service
             continue
 
+        click.secho("Services are renamed. This might fail!", fg="yellow")
         # adapt rel paths
         for name, service_content in svc_compose["services"].items():
             if "volumes" in service_content:
@@ -144,8 +152,9 @@ def init(clone_dir):
             if "build" in service_content:
                 service_content["build"] = adjust_build(
                         service_content["build"], repo_dir)
-            if "services" in compose_file:
-                data = compose_file["services"]
+            if "services" in svc_compose:
+                data = svc_compose["services"]
+                """
                 if name in data:
                     # rename the service; may work in some case, but
                     # container_name is not change and the references to the
@@ -155,13 +164,15 @@ def init(clone_dir):
                     # FIXME!
                     click.secho("This is bad: Two services having the same "
                                 "name ({})".format(name), fg="yellow")
-                    new_name = name + "_{}".format(svc)
-                    data[new_name] = data[name]
-                    click.secho("Service is renamed to {}. Check the config! "
-                                "This might fail!".format(new_name),
-                                fg="yellow")
-                    del data[name]
-                    compose_file["services"] = data
+                """
+                # rename each service for now...
+                new_name = "{}_{}".format(svc, name)
+                data[new_name] = data[name]
+                # click.secho("Service is renamed to {}. Check the config! "
+                #            "This might fail!".format(new_name),
+                #            fg="yellow")
+                del data[name]
+                svc_compose["services"] = data
 
         # todo checks before overriding
         merge_dicts(compose_file, svc_compose)

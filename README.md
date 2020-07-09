@@ -31,3 +31,13 @@ Download the newest version of the services and merges the docker-compose files.
 
 The command `run` starts all services or a specific service. This is just
 `docker-compose up`.
+Use the option `--group` with the name of a git repository to run the services comming from that repository.
+
+
+## docker-compose.yaml
+This file generated from all used git repositories.
+The name of the services are prefixed with the name of the git repository.
+References to host names are not working yet.
+Furthermore, it is not final what to do with duplicates...
+
+
