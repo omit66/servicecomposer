@@ -1,0 +1,5 @@
+example-voting-app:
+    url: https://github.com/dockersamples/example-voting-app
+
+dockercoins:
+    url: https://github.com/dockersamples/dockercoins
