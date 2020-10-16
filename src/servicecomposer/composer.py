@@ -84,6 +84,28 @@ def run(group, args):
     subprocess.Popen(cmd)
 
 
+def clean():
+    compose_file = find_compose_file('.')
+    if compose_file is None:
+        click.echo("The file docker-compose.yml was not found. Did you run "
+                   "'servicecomposer init'?")
+        return
+    import subprocess
+    services = []
+    for key, content in compose_file['services'].items():
+        services.append(content["container_name"])
+    cmd_stop = "docker stop".split()
+    cmd_rm = "docker rm".split()
+    cmd_stop.extend(services)
+    cmd_rm.extend(services)
+
+    click.echo(" ".join(cmd_stop))
+    popen = subprocess.Popen(cmd_stop)
+    popen.wait()
+    click.echo(" ".join(cmd_rm))
+    subprocess.Popen(cmd_rm)
+
+
 def download_service_repository(url, target):
     """Download the newest service repository."""
     if not os.path.exists(target):
@@ -145,7 +167,7 @@ def init(clone_dir):
 
         click.secho("Services are renamed. This might fail!", fg="yellow")
         # adapt rel paths
-        for name, service_content in svc_compose["services"].items():
+        for name, service_content in dict(svc_compose["services"]).items():
             if "volumes" in service_content:
                 service_content["volumes"] = adjust_volumes(
                         service_content['volumes'], repo_dir)
@@ -157,7 +179,7 @@ def init(clone_dir):
                 """
                 if name in data:
                     # rename the service; may work in some case, but
-                    # container_name is not change and the references to the
+                    # container_name is not changed and the references to the
                     # host name.
                     # Furhter, calling init twice will lead to two entries for
                     # the same service.
@@ -167,7 +189,7 @@ def init(clone_dir):
                 """
                 # rename each service for now...
                 new_name = "{}_{}".format(svc, name)
-                data[new_name] = data[name]
+                data[new_name] = service_content
                 # click.secho("Service is renamed to {}. Check the config! "
                 #            "This might fail!".format(new_name),
                 #            fg="yellow")

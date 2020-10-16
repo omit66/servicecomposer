@@ -17,6 +17,13 @@ def init(clone_dir):
 
 
 @click.command()
+def clean():
+    """Stop and remove all created docker containers"""
+    click.echo("Clean up docker containers...")
+    composer.clean()
+
+
+@click.command()
 @click.option("-g", "--group", help="Use the name of a git repo to call all "
               "originated services.")
 @click.argument('args', nargs=-1)
@@ -28,6 +35,7 @@ def run(group, args):
 
 main.add_command(init)
 main.add_command(run)
+main.add_command(clean)
 
 
 if __name__ == "__main__":
